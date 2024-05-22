@@ -21,10 +21,9 @@ function handleSnapchatPage() {
   if (!lastCheckTimestamp || (currentTime - lastCheckTimestamp) > 300000) { // 5 minutes = 300000 milliseconds
     getLastVersion().then(data => {
       if (data) {
-        localStorage.setItem(lastCheckTimestampKey, currentTime); // Update timestamp
-        localStorage.setItem(lastVersionKey, data.message); // Update version
-
         validateExtension(data.message);
+        localStorage.setItem(lastCheckTimestampKey, currentTime); 
+        localStorage.setItem(lastVersionKey, data.message);
       }
     });
   } else {
@@ -34,13 +33,30 @@ function handleSnapchatPage() {
 }
 
 function validateExtension(latestVersion) {
-  if (ExtensionVersion === latestVersion) {
-    validateToken();
-  } else {
+  var lastCheckTimestamp = localStorage.getItem(lastCheckTimestampKey);
+  var currentTime = new Date().getTime();
+
+  if (ExtensionVersion !== latestVersion) {
     displayExtensionUnavailableMessage("DOWNLOAD NEW VERSION");
+    return;
+  }
+
+  var isRecentCheck = (currentTime - lastCheckTimestamp) <= 300000; // 5 минут
+
+  if (isRecentCheck) {
+    handleToken();
+  } else {
+    validateToken();
   }
 }
 
+function handleToken() {
+  if (token && token.length > 0) {
+    window.location.href = "account.html";
+  } else {
+    createAuth();
+  }
+}
 function validateToken() {
   if (token && token.length > 0) {
     const data = { token: token };
