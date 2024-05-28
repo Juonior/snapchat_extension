@@ -1,4 +1,4 @@
-var ExtensionVersion = "1.0.2";
+var ExtensionVersion = "1.0.3";
 var token = localStorage.getItem('token');
 var lastCheckTimestampKey = 'lastVersionCheckTimestamp';
 var lastVersionKey = 'lastVersion';

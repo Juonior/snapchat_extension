@@ -1,13 +1,70 @@
+function ShowAlert(message, type = 'notification', autoCloseTime) {
+
+    function closeAlert(alert, alertContainer) {
+      alert.style.transform = 'translateX(-100%)';
+      alert.style.opacity = '0';
+      setTimeout(() => {
+          alertContainer.removeChild(alert);
+      }, 500);
+    }
+  
+    // Создаем контейнер для уведомлений, если его еще нет
+    let alertContainer = document.querySelector('.alert-container');
+    if (!alertContainer) {
+        alertContainer = document.createElement('div');
+        alertContainer.className = 'alert-container';
+        document.body.appendChild(alertContainer);
+    }
+  
+    // Создаем элемент уведомления
+    const alert = document.createElement('div');
+    alert.className = `alert ${type}`;
+  
+    const alertMessage = document.createElement('span');
+    alertMessage.innerText = message;
+  
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'close-btn';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.onclick = () => {
+        closeAlert(alert, alertContainer);
+    };
+  
+    alert.appendChild(alertMessage);
+    alert.appendChild(closeBtn);
+    alertContainer.appendChild(alert);
+  
+    // Запускаем анимацию появления
+    setTimeout(() => {
+        alert.classList.add('show');
+    }, 10);
+  
+    // Инициализируем автоматическое закрытие, если задано время
+    if (autoCloseTime !== undefined) {
+        setTimeout(() => {
+            closeAlert(alert, alertContainer);
+        }, autoCloseTime);
+    }
+  }
+// ShowAlert("Alloo")
 document.addEventListener('DOMContentLoaded', function() {
-    var modelInfo = document.getElementById("modelInfo");
-    var cta = document.getElementById("cta");
-    var ctaInfo = document.getElementById("ctaInfo");
-    modelInfo.value = "goes to college, likes to play volleyball and travels around the world"
-    cta.value = "Btw I wanna be honest ab smth and im really shyyyy\nBut recently I started an Onlyfans to try and support myself and I'm a big freak asw and it would mean a lot if u checked it out babe\nonlyfans.com\nlmk if you followed me so I could send u a surprise 🤭"
-    ctaInfo.value = "4$"
+    const defaultValues = {
+        name: '',
+        modelInfo: "goes to college, likes to play volleyball and travels around the world",
+        setting: "going through a break-up with her boyfriend",
+        sourceOfAdds: "Bumble/Tinder/Badoo/Tiktok/Instagram",
+        age: '',
+        city: '',
+        link: '',
+        platform: "Onlyfans/Fansly",
+        cta: "Btw I wanna be honest ab smth and im really shyyyy\nBut recently I started an Onlyfans to try and support myself and I'm a big freak asw and it would mean a lot if u checked it out babe\n(Insert your link)\nlmk if you followed me so I could send u a surprise 🤭",
+        ctaInfo: "4$",
+        ctaMessageNum: '25',
+        minCooldown: '60',
+        maxCooldown: '300'
+    };
 
     const textareas = document.querySelectorAll('textarea');
-    const inputs = document.querySelectorAll('input[type="text"]');
     const fileInput = document.getElementById('snaps-photos');
     const photosCount = document.querySelector('.photos-count');
 
@@ -27,6 +84,45 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    const inputIds = [
+        'name', 'modelInfo', 'setting', 'sourceOfAdds', 'age', 'city', 'link', 
+        'platform', 'cta', 'ctaInfo', 'ctaMessageNum', 'minCooldown', 'maxCooldown'
+    ];
+
+    // Функция для загрузки значений из LocalStorage или стандартных значений
+    function loadValues() {
+        inputIds.forEach(key => {
+            const input = document.getElementById(key);
+            if (input) {
+                input.value = localStorage.getItem(key) || defaultValues[key] || '';
+            }
+        });
+    }
+
+    // Функция для сохранения значений в LocalStorage
+    function saveValue(key, value) {
+        localStorage.setItem(key, value);
+    }
+
+    // Установка обработчиков событий для сохранения значений
+    document.querySelectorAll('textarea, input[type="text"]').forEach(input => {
+        input.addEventListener('input', (event) => {
+            saveValue(event.target.id, event.target.value);
+        });
+    });
+
+    // Загрузка значений при загрузке страницы
+    loadValues();
+
+    document.getElementById('returntodefault').addEventListener('click', function() {
+        inputIds.forEach(key => {
+            const input = document.getElementById(key);
+            if (input) {
+                input.value = defaultValues[key] || '';
+                saveValue(key, input.value);  // Сохраняем стандартное значение в LocalStorage
+            }
+        });
+    });
 });
 
 async function imagesToBase64() {
@@ -59,51 +155,34 @@ async function imagesToBase64() {
 }
 
 
-document.getElementById("back").addEventListener("click", function() {
+document.getElementById("back").addEventListener("click", async function() {
     window.location.href = "account.html";
 });  
+
+
 document.getElementById("create").addEventListener("click", async function() {
-    var name = document.getElementById("name").value;
-    var modelInfo = document.getElementById("modelInfo").value;
-    var setting = document.getElementById("setting").value;
-    var sourceOfAdds = document.getElementById("sourceOfAdds").value;
-    var age = document.getElementById("age").value;
-    var city = document.getElementById("city").value;
-    var link = document.getElementById("link").value;
-    var platform = document.getElementById("platform").value;
-    var cta = document.getElementById("cta").value;
-    var ctaInfo = document.getElementById("ctaInfo").value;
-    var ctaMessageNum = document.getElementById("ctaMessageNum").value;
-    var minCooldown = document.getElementById("minCooldown").value;
-    var maxCooldown = document.getElementById("maxCooldown").value;
-    var photos = await imagesToBase64()
-    var token = localStorage.getItem('token')
-    
-    if (name.length === 0 || modelInfo.length === 0 || setting.length === 0 || sourceOfAdds.length === 0 || age.length === 0 || city.length === 0 || link.length === 0 || cta.length === 0 || ctaInfo.length === 0 || ctaMessageNum.length === 0 || minCooldown.length === 0 || maxCooldown.length === 0) {
-        alert("Заполните все поля")
-        return; 
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    const tab = tabs[0];
+
+    const inputs = ['name', 'modelInfo', 'setting', 'sourceOfAdds', 'age', 'city', 'link', 'platform', 'cta', 'ctaInfo', 'ctaMessageNum', 'minCooldown', 'maxCooldown'];
+    const data = {};
+
+    for (const id of inputs) {
+        const element = document.getElementById(id);
+        if (element && element.value.length === 0) {
+            chrome.scripting.executeScript({ target: { tabId: tab.id }, func: ShowAlert, args: ["Заполните все поля для создания профиля", "error", 1500] });
+            return;
+        }
+        data[id] = element.value;
     }
-    if (photos.length == 0){
-        alert("Загрузите хотя бы 1 фотографию")
+    const photos = await imagesToBase64();
+    if (photos.length == 0) {
+        chrome.scripting.executeScript({ target: { tabId: tab.id }, func: ShowAlert, args: ["Профиль не создан: загрузите хотя бы 1 фотографию", "error", 1500] });
         return;
     }
-    const data = {
-        name: name,
-        modelInfo: modelInfo,
-        setting: setting,
-        sourceOfAdds: sourceOfAdds,
-        age: age,
-        city: city,
-        link: link,
-        platform: platform,
-        cta: cta,
-        ctaInfo: ctaInfo,
-        ctaMessageNum: ctaMessageNum,
-        minCooldown: minCooldown,
-        maxCooldown: maxCooldown,
-        photos: photos,
-        token: token
-    };
+    data.photos = photos;
+    data.token = localStorage.getItem('token');
+
     fetch('https://deluvity.ru/createProfile', {
     method: 'POST',
     headers: {
@@ -113,7 +192,9 @@ document.getElementById("create").addEventListener("click", async function() {
     })
     .then(response => response.json())
     .then(data => {
-        alert(data.message)
+        inputs.forEach(id => localStorage.removeItem(id)); 
+        chrome.scripting.executeScript({ target: { tabId: tab.id }, func: ShowAlert, args: ["Профиль "+name+" успешно создан", "notification", 2000] })
+        window.location.href = "account.html";
     })
     .catch(error => {
         console.error('Произошла проблема с выполнением запроса:', error);
