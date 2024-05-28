@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deluvity Profile Creation</title>
+    <link rel="stylesheet" type="text/css" href="../styles/createprofile.css">
+    <link rel="stylesheet" type="text/css" href="../styles/notifications.css">
+</head>
+<body>
+    <div class="profile-wrapper">
+        <div class="profile-container">
+            <h1>Deluvity <span class="settings-icon"></span> <span class="notification-icon"></span> <svg id="back" xmlns="http://www.w3.org/3000/svg" class="icon icon-tabler icon-tabler-arrow-back-up" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"/> <path d="M9 13l-4 -4l4 -4m-4 4h11a4 4 0 0 1 0 8h-1" /> </svg></h1>
+            <form>
+                <label for="profileID" id="profileID" style="display: none;">ProfileID</label>
+                <div class="form-group">
+                    <input type="text" id="name" name="name" required>
+                    <label for="name" class="floating-label">Name</label>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="age" name="age" required>
+                    <label for="age" class="floating-label">Age</label>
+                </div>
+                <div class="form-group">
+                    <textarea id="modelInfo" name="model-info" maxlength="300" required></textarea>
+                    <label for="model-info" class="floating-label">Model information</label>
+                    <div class="char-counter">68/300 characters</div>
+                </div>
+                <div class="form-group">
+                    <textarea id="cta" name="cta-" maxlength="300" required></textarea>
+                    <label for="cta" class="floating-label">CTA</label>
+                    <div class="char-counter">252/300 characters</div>
+                </div>
+                <div class="form-group">
+                    <textarea id="ctaInfo" name="cta-info" maxlength="300" required></textarea>
+                    <label for="cta-info" class="floating-label">CTA information</label>
+                    <div class="char-counter">2/300 characters</div>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="ctaMessageNum" name="ctaMessageNum" required>
+                    <label for="ctaMessageNum" class="floating-label">CTA message number</label>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="setting" name="setting" required>
+                    <label for="setting" class="floating-label">Setting</label>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="city" name="city" required>
+                    <label for="city" class="floating-label">City</label>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="sourceOfAdds" name="source-of-adds" required>
+                    <label for="source-of-adds" class="floating-label">Source of adds</label>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="platform" name="platform" required>
+                    <label for="platform" class="floating-label">Platform</label>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="link" name="link" required>
+                    <label for="link" class="floating-label">Link</label>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" id="minCooldown" name="minCooldown" required>
+                    <label for="minCooldown" class="floating-label">Min Cooldown</label>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" id="maxCooldown" name="maxCooldown" required>
+                    <label for="maxCooldown" class="floating-label">Max Cooldown</label>
+                </div>
+                <button type="button" id="save" class="create-profile">Save Changes</button>
+            </form>
+        </div>
+    </div>
+    <script src="../scripts/editprofile.js"></script>
+</body>
+</html>

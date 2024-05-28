@@ -51,6 +51,42 @@ async function setupButtonEvents() {
   });
 }
 
+async function deleteProfile(profileId, button) {
+  const token = localStorage.getItem('token');
+  const data = {
+      id: profileId,
+      token: token
+  };
+
+  const runningProfile = JSON.parse(localStorage.getItem('profile'));
+  if (runningProfile && runningProfile.id === profileId) {
+    // Stop the running profile
+    localStorage.setItem('isRunning', 'false');
+    sendMessageToBackground({ action: 'stopbot' });
+    localStorage.removeItem('profile');
+  }
+  
+  try {
+      const response = await fetch('https://deluvity.ru/deleteProfile', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+      });
+
+      const responseData = await response.json();
+      if (responseData.success) {
+          button.remove();
+      } else {
+          console.error('Ошибка при удалении профиля:', responseData.error);
+      }
+  } catch (error) {
+      console.error('Произошла проблема с выполнением запроса:', error);
+  }
+}
+
+
 async function listProfiles() {
   const token = localStorage.getItem('token');
   if (!token) {
@@ -74,11 +110,31 @@ async function listProfiles() {
       const responseData = await response.json();
       if (responseData.success) {
           const profilesDiv = document.querySelector('.profiles');
+          profilesDiv.innerHTML = ''; // Clear existing profiles if any
           responseData.message.forEach(profile => {
               const button = document.createElement('button');
               button.textContent = profile.name;
-              button.profile = profile
-              button.id = profile.id
+              button.profile = profile;
+              button.id = profile.id;
+
+              const editIcon = document.createElement('i');
+              editIcon.className = 'fas fa-pencil-alt icon edit-icon';
+              editIcon.addEventListener('click', (event) => {
+                  event.stopPropagation();
+                  const profileData = JSON.stringify(profile);
+                  const encodedProfileData = encodeURIComponent(profileData);
+                  window.location.href = `editprofile.html?profile=${encodedProfileData}`;
+              });
+              button.appendChild(editIcon);
+
+              const deleteIcon = document.createElement('i');
+              deleteIcon.className = 'fas fa-times icon delete-icon';
+              deleteIcon.addEventListener('click', async (event) => {
+                  event.stopPropagation();
+                  await deleteProfile(profile.id, button);
+              });
+              button.appendChild(deleteIcon);
+
               profilesDiv.appendChild(button);
           });
           checkLocalStorage();

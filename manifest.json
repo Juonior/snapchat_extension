@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Snapchat bot",
-    "version": "1.0",
+    "version": "1.0.4",
     "description": "Snapchat AI conservations",
     "permissions": [
       "activeTab",
@@ -22,6 +22,12 @@
       {
         "matches": ["https://web.snapchat.com/*"],
         "js": ["background_scripts/content.js"],
+        "css": ["styles/notifications.css"],
+        "run_at": "document_end"
+      },
+      {
+        "matches": ["https://deluvity.ru/*"],
+        "js": ["background_scripts/deluvity.js"],
         "css": ["styles/notifications.css"],
         "run_at": "document_end"
       }

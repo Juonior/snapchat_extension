@@ -1,4 +1,5 @@
-var ExtensionVersion = "1.0.3";
+const manifest = chrome.runtime.getManifest();
+var ExtensionVersion = manifest.version;
 var token = localStorage.getItem('token');
 var lastCheckTimestampKey = 'lastVersionCheckTimestamp';
 var lastVersionKey = 'lastVersion';
@@ -9,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (tab.url.includes("snapchat.com")) {
       handleSnapchatPage();
     } else {
-      displayExtensionUnavailableMessage("EXTENSION NOT AVAILABLE");
+      displayExtensionUnavailableMessage("WEBSITE NOT AVAILABLE");
     }
   });
 });
@@ -37,7 +38,7 @@ function validateExtension(latestVersion) {
   var currentTime = new Date().getTime();
 
   if (ExtensionVersion !== latestVersion) {
-    displayExtensionUnavailableMessage("DOWNLOAD NEW VERSION");
+    displayExtensionUnavailableMessage("YOUR VERSION IS OUTDATED");
     return;
   }
 
@@ -133,4 +134,18 @@ function displayExtensionUnavailableMessage(message) {
 
   var container = document.querySelector("div.auth");
   container.style.display = "none";
+
+  if (message === "YOUR VERSION IS OUTDATED"){
+    // Add the download button container
+    var downloadButtonContainer = document.createElement('div');
+    downloadButtonContainer.classList.add('download-button-container');
+
+    var downloadButton = document.createElement('a');
+    downloadButton.href = "https://deluvity.ru/download";
+    downloadButton.classList.add('download-button');
+    downloadButton.textContent = "Download New Version";
+
+    downloadButtonContainer.appendChild(downloadButton);
+    document.body.appendChild(downloadButtonContainer);
+  }
 }
