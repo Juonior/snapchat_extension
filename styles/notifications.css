@@ -1,0 +1,43 @@
+.alert-container {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.alert {
+  color: white;
+  padding: 15px;
+  margin-top: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  opacity: 0;
+  transform: translateX(-100%);
+  transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+}
+
+.alert.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.alert.notification {
+  background-color: rgba(128, 0, 255, 1);
+}
+
+.alert.error {
+  background-color: rgba(255, 0, 0, 1); /* Harmonious red for errors */
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}

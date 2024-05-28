@@ -8,7 +8,7 @@
       "scripting"
     ],
     "background": {
-      "service_worker": "background.js"
+      "service_worker": "background_scripts/background.js"
     },
     "action": {
       "default_popup": "templates/authorization.html",
@@ -21,12 +21,14 @@
     "content_scripts": [
       {
         "matches": ["https://web.snapchat.com/*"],
-        "js": ["content.js"]
+        "js": ["background_scripts/content.js"],
+        "css": ["styles/notifications.css"],
+        "run_at": "document_end"
       }
     ],
     "web_accessible_resources": [
       {
-        "resources": ["injected-script.js"],
+        "resources": ["background_scripts/camera.js", "background_scripts/notifications.js","background_scripts/unbreaker.js"],
         "matches": ["<all_urls>"]
       }
     ]
