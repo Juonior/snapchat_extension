@@ -156,7 +156,7 @@ function getConservationToAnswer(profile_string, ignore_list) {
                 var datetime = datetime_item.getAttribute('datetime');
                 var chat_status = item.querySelector('span.GQKvA').innerText;
                 var time_elapsed = (Date.now() / 1000) - Date.parse(datetime) / 1000;
-                if (time_elapsed > 86400 && !chat_status.includes("New Snap on mobile") && !chat_status.includes("New Chats and Snaps")) {
+                if (time_elapsed > 86400 && !chat_status.includes("New Snap on mobile")) {
                   resultArray.push({ "nickname": nickname, "buttonNum": i, "action": "send", "link": link});
                 } else if ((chat_status.includes("Received") ||  chat_status.includes("New Chat")) && time_elapsed > Math.floor(Math.random() * (profile.maxCooldown  - profile.minCooldown  + 1)) + profile.minCooldown ){
                   resultArray.push({ "nickname": nickname, "buttonNum": i, "action": "answer", "link": link});
@@ -187,12 +187,14 @@ function getMessages(){
 
       if (senderNameTag) {
           var sender;
-          if (senderNameTag.textContent == "Me") {sender = "assistant"} else {sender = "user"}
+          if (senderNameTag.textContent === "Me") {sender = "assistant"} else {sender = "user"}
           var snapTag = message_container.querySelector('div.mZgqh');
-          if (snapTag) {messagesString += ' !photo'}
+          if (snapTag != null && sender === "assistant") {messagesString += "*BotPhoto*";}
+          else if (snapTag != null && sender === "user") {messagesString += " User sent a photo NEVER GIVE A PHOTO ON THAT MESSAGE!!!!!!"}
           messages.push({ "role": sender, "content": messagesString });
       }
   });
+
   return messages;
 }
 
