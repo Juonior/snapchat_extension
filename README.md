@@ -1,4 +1,5 @@
-# <img src="https://www.svgrepo.com/show/303130/snapchat-logo.svg" alt="Snapchat" width="25"/> Snapchat Extension 
+
+# <p align="center"><img src="https://www.svgrepo.com/show/303130/snapchat-logo.svg" alt="Snapchat" width="25"/> Snapchat Extension </p>
 
 ##  Описание
 
