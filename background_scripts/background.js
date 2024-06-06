@@ -293,7 +293,7 @@ async function startbot(message) {
             if (!botRunning) return;
             const currentURL = (await chrome.scripting.executeScript({ target: { tabId: message.tab.id }, func: getURL, args: [] }))[0].result;
             if (currentURL != conversation.link){
-            
+
               await Do(message.tab,ShowAlert, ["Открываю диалог c "+conversation.nickname, "notification", 1200])
               await Do(message.tab,ClickConservationButton, [conversation.link])
             }
@@ -307,44 +307,58 @@ async function startbot(message) {
             } else if  (conversation.action == "answer") {
               var profile = JSON.parse(message.profile);
 
-              var messages = (await chrome.scripting.executeScript({ target: { tabId: message.tab.id }, func: getMessages }))[0].result;
-              var messagesFromStartToLastNine = messages.slice(0, -15);
-              var checkIgnor = messagesFromStartToLastNine.some(message => message.content.includes(profile.link));
-              if (!checkIgnor) {
-                var answers = await getAnswer(message, messages, message.profile)
-                const answerArray = answers.split("\n");
-                for (const answer of answerArray) {
-                  if (answer.length > 0) {
-                    if (answer == "!photo"){
-                      var IMAGE_BASE64 = await getPhoto(message, message.profile, conversation.nickname)
-                      await Do(message.tab, ChangeCamTo, [IMAGE_BASE64]);;
-                      await wait(2000);
-                      await Do(message.tab, sendSnap, []);
-                      await wait(500);
-                    } else {
-                      await wait(500);
+              var messages = (await chrome.scripting.executeScript({
+                target: {tabId: message.tab.id},
+                func: getMessages
+              }))[0].result;
+              var attempt = 0;
+              while ((messages.length === 0) && (attempt < 3)) {
+                attempt += 1;
+                messages = (await chrome.scripting.executeScript({
+                  target: {tabId: message.tab.id},
+                  func: getMessages
+                }))[0].result;
+              }
+              if (messages.length > 0) {
+                var messagesFromStartToLastNine = messages.slice(0, -15);
+                var checkIgnor = messagesFromStartToLastNine.some(message => message.content.includes(profile.link));
+                if (!checkIgnor) {
+                  var answers = await getAnswer(message, messages, message.profile)
+                  const answerArray = answers.split("\n");
+                  for (const answer of answerArray) {
+                    if (answer.length > 0) {
+                      if (answer == "!photo") {
+                        var IMAGE_BASE64 = await getPhoto(message, message.profile, conversation.nickname)
+                        await Do(message.tab, ChangeCamTo, [IMAGE_BASE64]);
+                        ;
+                        await wait(2000);
+                        await Do(message.tab, sendSnap, []);
+                        await wait(500);
+                      } else {
+                        await wait(500);
 
+                        await Do(message.tab, WriteMessageToChat, [answer]);
+                        await Do(message.tab, ShowAlert, ["Сообщение будет отправлено: " + (answer.length * 150) / 1000 + " секунд", "notification", 1200])
+                        await wait(answer.length * 150);
+
+                        await Do(message.tab, SendMessageToChat, []);
+                      }
+                    }
+                  }
+                  var AssitantCountMessages = messages.filter(message => message.role === "assistant").length;
+                  if (AssitantCountMessages + 1 == profile.ctaMessageNum) {
+                    const answerArray = profile.cta.split("\n");
+                    for (const answer of answerArray) {
+                      await wait(500);
                       await Do(message.tab, WriteMessageToChat, [answer]);
-                      await Do(message.tab,ShowAlert, ["Сообщение будет отправлено: "+(answer.length * 150)/1000+" секунд" , "notification", 1200])
                       await wait(answer.length * 150);
 
                       await Do(message.tab, SendMessageToChat, []);
                     }
                   }
+                } else {
+                  ignore_list.push(conversation.nickname);
                 }
-                var AssitantCountMessages = messages.filter(message => message.role === "assistant").length;
-                if (AssitantCountMessages+1 ==  profile.ctaMessageNum){
-                  const answerArray = profile.cta.split("\n");
-                  for (const answer of answerArray) {
-                    await wait(500);
-                    await Do(message.tab, WriteMessageToChat, [answer]);
-                    await wait(answer.length * 150);
-
-                    await Do(message.tab, SendMessageToChat, []);
-                  }
-                }
-              } else {
-                ignore_list.push(conversation.nickname);
               }
             }
           }
@@ -360,7 +374,7 @@ async function startbot(message) {
         await Do(message.tab,CloseCurrentConservation, [])
       }
       await Do(message.tab,ScrollPage, []);
-      
+
     } catch (error) {
       console.error("Ошибка при выполнении скрипта:", error);
     }
