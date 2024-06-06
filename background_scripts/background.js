@@ -115,7 +115,17 @@ async function ChangeCamTo(IMAGE_BASE64){
   (document.head || document.documentElement).append(s);
 }
 
-
+async function ScrollPage(){
+  var dialog_div = document.querySelector('div[aria-label="Friends Feed"]')
+  var scroll_position = dialog_div.scrollTop
+  var scroll_height = dialog_div.scrollHeight
+  var client_height = dialog_div.clientHeight
+  if (scroll_position + client_height == scroll_height){
+      dialog_div.scrollTop = 0;
+  } else {
+      dialog_div.scrollTop += 740;
+  }
+}
 
 
 function should_respond(user_name, profile_string) {
@@ -156,7 +166,7 @@ function getConservationToAnswer(profile_string, ignore_list) {
                 var datetime = datetime_item.getAttribute('datetime');
                 var chat_status = item.querySelector('span.GQKvA').innerText;
                 var time_elapsed = (Date.now() / 1000) - Date.parse(datetime) / 1000;
-                if (time_elapsed > 86400 && !chat_status.includes("New Snap on mobile")) {
+                if (time_elapsed > 86400 && chat_status.includes("Say Hi!")) {
                   resultArray.push({ "nickname": nickname, "buttonNum": i, "action": "send", "link": link});
                 } else if ((chat_status.includes("Received") ||  chat_status.includes("New Chat")) && time_elapsed > Math.floor(Math.random() * (profile.maxCooldown  - profile.minCooldown  + 1)) + profile.minCooldown ){
                   resultArray.push({ "nickname": nickname, "buttonNum": i, "action": "answer", "link": link});
@@ -349,6 +359,7 @@ async function startbot(message) {
         await Do(message.tab,ShowAlert, ["Закрываю диалог", "notification", 1200])
         await Do(message.tab,CloseCurrentConservation, [])
       }
+      await Do(message.tab,ScrollPage, []);
       
     } catch (error) {
       console.error("Ошибка при выполнении скрипта:", error);
