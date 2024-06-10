@@ -166,8 +166,11 @@ function getConservationToAnswer(profile_string, ignore_list) {
                 var datetime = datetime_item.getAttribute('datetime');
                 var chat_status = item.querySelector('span.GQKvA').innerText;
                 var time_elapsed = (Date.now() / 1000) - Date.parse(datetime) / 1000;
-                if (time_elapsed > 86400 && chat_status.includes("Say Hi!")) {
-                  resultArray.push({ "nickname": nickname, "buttonNum": i, "action": "send", "link": link});
+                if (time_elapsed > 7200 && chat_status.includes("Opened")){
+                  resultArray.push({ "nickname": nickname, "buttonNum": i, "action": "send", "message": "why did u leave me on seen?","link": link});
+                }
+                else if (time_elapsed > 86400 && chat_status.includes("Say Hi!")) {
+                  resultArray.push({ "nickname": nickname, "buttonNum": i, "action": "send", "message": "Heyy","link": link});
                 } else if ((chat_status.includes("Received") ||  chat_status.includes("New Chat")) && time_elapsed > Math.floor(Math.random() * (profile.maxCooldown  - profile.minCooldown  + 1)) + profile.minCooldown ){
                   resultArray.push({ "nickname": nickname, "buttonNum": i, "action": "answer", "link": link});
                 }
@@ -299,7 +302,7 @@ async function startbot(message) {
             }
             await wait(500);
             if (conversation.action == "send") {
-                await Do(message.tab,WriteMessageToChat, ["Heyyy"])
+                await Do(message.tab,WriteMessageToChat, [conversation.message])
                 await wait(500);
                 await Do(message.tab,SendMessageToChat, [])
 
