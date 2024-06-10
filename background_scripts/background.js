@@ -340,7 +340,7 @@ async function startbot(message) {
               if (messages.length > 0) {
                 var messagesFromStartToLastNine = messages.slice(0, -15);
                 var checkIgnor = messagesFromStartToLastNine.some(message => message.content.includes(profile.link));
-                if (messages.at(-1)["role"] === "user"){
+                if (messages.at(-1)["role"] === "user") {
                   if (!checkIgnor) {
                     var answers = await getAnswer(message, messages, message.profile)
                     const answerArray = answers.split("\n");
@@ -362,8 +362,8 @@ async function startbot(message) {
                           await wait(answer.length * 150);
 
                           await Do(message.tab, SendMessageToChat, []);
-                          }
                         }
+                      }
                     }
                     var AssitantCountMessages = messages.filter(message => message.role === "assistant").length;
                     if (AssitantCountMessages + 1 == profile.ctaMessageNum) {
@@ -376,9 +376,9 @@ async function startbot(message) {
                         await Do(message.tab, SendMessageToChat, []);
                       }
                     }
+                  } else {
+                    ignore_list.push(conversation.nickname);
                   }
-                } else {
-                  ignore_list.push(conversation.nickname);
                 }
               }
             }
