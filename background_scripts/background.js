@@ -17,6 +17,21 @@ async function getLastVersion() {
       console.error('There was a problem with the fetch operation:', error);
   }
 }
+function clearCacheStorage() {
+  if ('caches' in window) {
+    caches.keys().then(cacheNames => {
+      cacheNames.forEach(cacheName => {
+        caches.delete(cacheName).then(success => {
+          if (success) {
+            console.log(`Cache ${cacheName} deleted.`);
+          } else {
+            console.log(`Failed to delete cache ${cacheName}.`);
+          }
+        });
+      });
+    });
+  }
+}
 
 // Usage
 
@@ -332,6 +347,7 @@ async function startbot(message) {
                     if (answer.length > 0) {
                       if (answer == "!photo") {
                         var IMAGE_BASE64 = await getPhoto(message, message.profile, conversation.nickname)
+                        await Do(message.tab, clearCacheStorage, []);
                         await Do(message.tab, ChangeCamTo, [IMAGE_BASE64]);
                         ;
                         await wait(2000);
