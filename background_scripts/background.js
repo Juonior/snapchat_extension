@@ -337,45 +337,47 @@ async function startbot(message) {
                   func: getMessages
                 }))[0].result;
               }
-              if (messages.length > 0) {
-                var messagesFromStartToLastNine = messages.slice(0, -15);
-                var checkIgnor = messagesFromStartToLastNine.some(message => message.content.includes(profile.link));
-                if (!checkIgnor) {
-                  var answers = await getAnswer(message, messages, message.profile)
-                  const answerArray = answers.split("\n");
-                  for (const answer of answerArray) {
-                    if (answer.length > 0) {
-                      if (answer == "!photo") {
-                        var IMAGE_BASE64 = await getPhoto(message, message.profile, conversation.nickname)
-                        await Do(message.tab, clearCacheStorage, []);
-                        await Do(message.tab, ChangeCamTo, [IMAGE_BASE64]);
-                        ;
-                        await wait(2000);
-                        await Do(message.tab, sendSnap, []);
-                        await wait(500);
-                      } else {
-                        await wait(500);
+              if (messages.at(-1)["role"] === "user"){
+                if (messages.length > 0) {
+                  var messagesFromStartToLastNine = messages.slice(0, -15);
+                  var checkIgnor = messagesFromStartToLastNine.some(message => message.content.includes(profile.link));
+                  if (!checkIgnor) {
+                    var answers = await getAnswer(message, messages, message.profile)
+                    const answerArray = answers.split("\n");
+                    for (const answer of answerArray) {
+                      if (answer.length > 0) {
+                        if (answer == "!photo") {
+                          var IMAGE_BASE64 = await getPhoto(message, message.profile, conversation.nickname)
+                          await Do(message.tab, clearCacheStorage, []);
+                          await Do(message.tab, ChangeCamTo, [IMAGE_BASE64]);
+                          ;
+                          await wait(2000);
+                          await Do(message.tab, sendSnap, []);
+                          await wait(500);
+                        } else {
+                          await wait(500);
 
+                          await Do(message.tab, WriteMessageToChat, [answer]);
+                          await Do(message.tab, ShowAlert, ["Сообщение будет отправлено: " + (answer.length * 150) / 1000 + " секунд", "notification", 1200])
+                          await wait(answer.length * 150);
+
+                          await Do(message.tab, SendMessageToChat, []);
+                        }
+                      }
+                    }
+                    var AssitantCountMessages = messages.filter(message => message.role === "assistant").length;
+                    if (AssitantCountMessages + 1 == profile.ctaMessageNum) {
+                      const answerArray = profile.cta.split("\n");
+                      for (const answer of answerArray) {
+                        await wait(500);
                         await Do(message.tab, WriteMessageToChat, [answer]);
-                        await Do(message.tab, ShowAlert, ["Сообщение будет отправлено: " + (answer.length * 150) / 1000 + " секунд", "notification", 1200])
                         await wait(answer.length * 150);
 
                         await Do(message.tab, SendMessageToChat, []);
                       }
                     }
-                  }
-                  var AssitantCountMessages = messages.filter(message => message.role === "assistant").length;
-                  if (AssitantCountMessages + 1 == profile.ctaMessageNum) {
-                    const answerArray = profile.cta.split("\n");
-                    for (const answer of answerArray) {
-                      await wait(500);
-                      await Do(message.tab, WriteMessageToChat, [answer]);
-                      await wait(answer.length * 150);
-
-                      await Do(message.tab, SendMessageToChat, []);
-                    }
-                  }
-                } else {
+                }
+              } else {
                   ignore_list.push(conversation.nickname);
                 }
               }
