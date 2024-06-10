@@ -4,6 +4,7 @@
     "version": "1.0.6",
     "description": "Snapchat AI conservations",
     "permissions": [
+      "declarativeNetRequest",
       "activeTab",
       "scripting"
     ],
@@ -37,5 +38,14 @@
         "resources": ["background_scripts/camera.js", "background_scripts/notifications.js","background_scripts/unbreaker.js"],
         "matches": ["<all_urls>"]
       }
-    ]
+    ],
+    "declarative_net_request": {
+      "rule_resources": [
+        {
+          "id": "ruleset_1",
+          "enabled": true,
+          "path": "rules.json"
+        }
+      ]
+    }
   }
