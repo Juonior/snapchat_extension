@@ -1,45 +1,10 @@
-
-async function getLastVersion() {
-  try {
-      const response = await fetch('https://deluvity.ru/lastVersion', {
-          method: 'GET',
-          headers: {
-              'Content-Type': 'application/json'
-          }
-      });
-
-      if (!response.ok) {
-          throw new Error('Network response was not ok ' + response.statusText);
-      }
-      const responseData = await response.json();
-      return responseData;
-  } catch (error) {
-      console.error('There was a problem with the fetch operation:', error);
-  }
-}
-function clearCacheStorage() {
-  if ('caches' in window) {
-    caches.keys().then(cacheNames => {
-      cacheNames.forEach(cacheName => {
-        caches.delete(cacheName).then(success => {
-          if (success) {
-            console.log(`Cache ${cacheName} deleted.`);
-          } else {
-            console.log(`Failed to delete cache ${cacheName}.`);
-          }
-        });
-      });
-    });
-  }
-}
-
 // Usage
 
 let botRunning = false;
 var last_responses = {};
 var token = "";
 var ignore_list = [];
-
+var lastHI_time = 0;
 chrome.runtime.onMessage.addListener(function(message) {
   if (message.action === 'startbot') {
     botRunning = true; 
@@ -105,7 +70,6 @@ function ShowAlert(message, type = 'notification', autoCloseTime) {
 }
 
 async function CloseCurrentConservation() { var closebtn = document.querySelector("div.O4POs.qFDXZ"); if (closebtn){ closebtn.click()}}
-// function ClickConservationButton(btn_num){document.querySelectorAll('div[role="button"]')[btn_num].click()}
 function ClickConservationButton(link) {
   var conservationButtons = document.querySelectorAll('div[role="listitem"]');
   conservationButtons.forEach(conservationButton => {
@@ -121,7 +85,54 @@ function ClickConservationButton(link) {
 }
 function WriteMessageToChat(text){var textBox = document.querySelector('div[role="textbox"]');textBox.textContent = text;textBox.dispatchEvent(new Event('input', { bubbles: true }));}
 function SendMessageToChat(){var btn_send = document.querySelector('button[class="IHV_t v4zfr"]');if (btn_send){btn_send.click();}}
-async function sendSnap(){document.querySelector('button[class="cDumY EQJi_ eKaL7 Bnaur"]').click();await new Promise(resolve => setTimeout(resolve, 1000));;document.querySelector('button[class="FBYjn gK0xL A7Cr_ m3ODJ"]').click();await new Promise(resolve => setTimeout(resolve, 200));const spanElements = document.querySelectorAll('span');const lastSpan = spanElements[spanElements.length - 1];lastSpan.click()}
+async function sendSnap(){
+  SnapInChat = document.querySelector('button[class="cDumY EQJi_ eKaL7 Bnaur"]')
+  if (SnapInChat){
+    SnapInChat.click();
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    SnapDiv = document.querySelector('div[class="gIloE AEZEl"]')
+
+    TakeSnap = document.querySelector('button[class="FBYjn gK0xL A7Cr_ m3ODJ"]')
+    if (TakeSnap) {
+      TakeSnap.click();
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      SendToButton = document.querySelector('button[class="YatIx fGS78 eKaL7 Bnaur"]')
+      if (SendToButton){
+        SendToButton.click()
+        await new Promise(resolve => setTimeout(resolve, 200));
+      } 
+      FinalSendButton = document.querySelector('button[class="TYX6O eKaL7 Bnaur"]')
+      if (FinalSendButton){
+        FinalSendButton.click()
+      }
+    } else {
+      BackGroundElement = document.querySelector('div[class="UriZL"]')
+      BackGroundElement.style.display = "None";
+      ShowAlert("У Вас отсуствует камера", "error")
+    }
+  } else {
+    ShowAlert("Снап не отправлен: не обнаружена кнопка отправки снапа", "error")
+  }
+}
+
+
+function clearCacheStorage() {
+  if ('caches' in window) {
+    caches.keys().then(cacheNames => {
+      cacheNames.forEach(cacheName => {
+        caches.delete(cacheName).then(success => {
+          if (success) {
+            console.log(`Cache ${cacheName} deleted.`);
+          } else {
+            console.log(`Failed to delete cache ${cacheName}.`);
+          }
+        });
+      });
+    });
+  }
+}
+
 async function ChangeCamTo(IMAGE_BASE64){
   localStorage.setItem('IMAGE_BASE64', IMAGE_BASE64)
   const s = document.createElement('script');
@@ -150,6 +161,7 @@ function should_respond(user_name, profile_string) {
   return current_time - last_response_time > profile.minCooldown
 }
 
+
 function update_last_response(user_name) {
   last_responses[user_name] = Date.now() / 1000;
 }
@@ -158,13 +170,17 @@ function update_last_response(user_name) {
 
 
 
+function getConservationToAnswer(profile_string, ignore_list, lastHI_time) {
 
-function getConservationToAnswer(profile_string, ignore_list) {
+  function getRandomMessage() {
+    const messages = ["Heyy", "Hiii", "Hi", "Heyyyy", "Hey"];
+    return messages[Math.floor(Math.random() * messages.length)];
+  }
+  
   var listItems = document.querySelectorAll('div[role="listitem"]');
   var listItemsArray = Array.from(listItems);
   var resultArray = [];
   var profile = JSON.parse(profile_string);
-  var i = 0;
   listItemsArray.forEach(item => {
     try {
       if (item){
@@ -181,13 +197,21 @@ function getConservationToAnswer(profile_string, ignore_list) {
                 var datetime = datetime_item.getAttribute('datetime');
                 var chat_status = item.querySelector('span.GQKvA').innerText;
                 var time_elapsed = (Date.now() / 1000) - Date.parse(datetime) / 1000;
+                var HiTime_elapse =  (Date.now() / 1000) - lastHI_time
+                console.log(nickname+" "+HiTime_elapse)
                 if (time_elapsed > 7200 && chat_status.includes("Opened")){
-                  resultArray.push({ "nickname": nickname, "buttonNum": i, "action": "send", "message": "why did u leave me on seen?","link": link});
+                  resultArray.push({ "nickname": nickname, "action": "send", "message": "why did u leave me on seen?","link": link});
                 }
-                else if (time_elapsed > 86400 && chat_status.includes("Say Hi!")) {
-                  resultArray.push({ "nickname": nickname, "buttonNum": i, "action": "send", "message": "Heyy","link": link});
+                else if (HiTime_elapse > 120 && chat_status.includes("Say")) {
+                  resultArray.push({ "nickname": nickname, "action": "send", "message": getRandomMessage(),"link": link});
                 } else if ((chat_status.includes("Received") ||  chat_status.includes("New Chat")) && time_elapsed > Math.floor(Math.random() * (profile.maxCooldown  - profile.minCooldown  + 1)) + profile.minCooldown ){
-                  resultArray.push({ "nickname": nickname, "buttonNum": i, "action": "answer", "link": link});
+                  resultArray.push({ "nickname": nickname, "action": "answer", "link": link});
+                } 
+              } else {
+                var HiTime_elapse =  (Date.now() / 1000) - lastHI_time
+                var chat_status = item.querySelector('span.GQKvA').innerText;
+                if (HiTime_elapse > 120 && chat_status.includes("Say")) {
+                  resultArray.push({ "nickname": nickname, "action": "send", "message": getRandomMessage(),"link": link});
                 }
               }
             }
@@ -197,7 +221,6 @@ function getConservationToAnswer(profile_string, ignore_list) {
     } catch (error) {
       console.error("Ошибка при обработке элемента:", error);
     }
-    i += 1;
   });
   return resultArray;
 }
@@ -304,7 +327,7 @@ async function startbot(message) {
   while (botRunning){
     try {
       if (!botRunning) return;
-      const ConservationToAnswer = (await chrome.scripting.executeScript({ target: { tabId: message.tab.id }, func: getConservationToAnswer, args: [message.profile, ignore_list] }))[0].result;
+      const ConservationToAnswer = (await chrome.scripting.executeScript({ target: { tabId: message.tab.id }, func: getConservationToAnswer, args: [message.profile, ignore_list, lastHI_time] }))[0].result;
       for (const conversation of ConservationToAnswer) {
         try{
           if (should_respond(conversation.nickname,message.profile)){
@@ -320,15 +343,12 @@ async function startbot(message) {
                 await Do(message.tab,WriteMessageToChat, [conversation.message])
                 await wait(500);
                 await Do(message.tab,SendMessageToChat, [])
-
+                lastHI_time = Date.now() / 1000;
                 update_last_response(conversation.nickname)
             } else if  (conversation.action == "answer") {
               var profile = JSON.parse(message.profile);
 
-              var messages = (await chrome.scripting.executeScript({
-                target: {tabId: message.tab.id},
-                func: getMessages
-              }))[0].result;
+              var messages = (await chrome.scripting.executeScript({target: {tabId: message.tab.id},func: getMessages}))[0].result;
               var attempt = 0;
               while ((messages.length === 0) && (attempt < 3)) {
                 attempt += 1;
@@ -350,7 +370,7 @@ async function startbot(message) {
                           var IMAGE_BASE64 = await getPhoto(message, message.profile, conversation.nickname)
                           await Do(message.tab, clearCacheStorage, []);
                           await Do(message.tab, ChangeCamTo, [IMAGE_BASE64]);
-                          ;
+
                           await wait(2000);
                           await Do(message.tab, sendSnap, []);
                           await wait(500);
